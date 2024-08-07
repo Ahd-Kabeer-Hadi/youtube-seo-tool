@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# YouTube SEO Tool
 
-## Getting Started
+Welcome to the YouTube SEO Tool! This project is designed to help YouTube content creators optimize their channels and videos for better search engine visibility. This tool leverages the YouTube API to provide essential functionalities like channel overview, keyword research, and video upload capabilities.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **User Login with Google Authentication**:
+   - Users can securely log in to their YouTube channels using Google Authentication.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Channel Overview Dashboard**:
+   - Displays an overview of the user's YouTube channel using the channel ID and YouTube API. This includes metrics like total views, subscribers, and number of videos.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **YouTube Keyword Research Tool**:
+   - Provides relevant SEO keywords/tags based on user input keywords using the YouTube API. This helps users to enhance their video visibility on YouTube.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+4. **Video Upload to YouTube Channel**:
+   - Allows users to upload videos directly to their YouTube channels using the YouTube API.
 
-## Learn More
+## Installation
 
-To learn more about Next.js, take a look at the following resources:
+To get started with this project, follow the steps below:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/Ahd-Kabeer-Hadi/youtube-seo-tool.git
+   cd youtube-seo-tool
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+2. **Install Dependencies**:
+   Ensure you have Node.js and npm installed. Then, run:
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Set Up Google API Credentials**:
+   - Go to the [Google Developers Console](https://console.developers.google.com/).
+   - Create a new project and enable the YouTube Data API v3.
+   - Set up OAuth 2.0 credentials and download the `client_secret.json` file.
+   - Place the `client_secret.json` file in the root directory of the project.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Run the Application**:
+   ```bash
+   npm start
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Usage
+
+1. **Login to YouTube Channel**:
+   - On the homepage, click on the "Login with Google" button.
+   - Authorize the application to access your YouTube account.
+
+2. **View Channel Overview**:
+   - After logging in, you will be redirected to the dashboard.
+   - The dashboard displays an overview of your YouTube channel, including total views, subscribers, and number of videos.
+
+3. **Keyword Research**:
+   - Navigate to the "Keyword Research" tab.
+   - Enter a keyword or phrase and click on the "Search" button.
+   - The tool will display relevant SEO keywords/tags based on the YouTube API.
+
+4. **Upload Video**:
+   - Go to the "Upload Video" tab.
+   - Fill in the required fields (video title, description, tags, etc.).
+   - Select the video file to upload and click on the "Upload" button.
+   - The video will be uploaded to your YouTube channel using the YouTube API.
+
+## Contributing
+
+We welcome contributions to improve this project! To contribute:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+If you have any questions or need further assistance, feel free to open an issue on GitHub or contact the project maintainer:
+
+- **Name**: Ahd Kabeer Hadi
+- **GitHub**: [Ahd-Kabeer-Hadi](https://github.com/Ahd-Kabeer-Hadi)
+
+Thank you for using the YouTube SEO Tool!
