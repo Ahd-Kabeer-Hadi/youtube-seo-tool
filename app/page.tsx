@@ -18,7 +18,11 @@ export default function Home() {
 
   const userHasYouTubeData = session?.user && (session.user as User).youtube;
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading...
+      </div>
+    );
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
