@@ -1,5 +1,6 @@
-import Link from 'next/link';
-import React from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
 interface YouTubeChannelInfoProps {
   user: {
@@ -15,7 +16,6 @@ interface YouTubeChannelInfoProps {
           high: {
             url: string;
           };
-          
         };
       };
       statistics: {
@@ -37,7 +37,9 @@ const YouTubeChannelInfo: React.FC<YouTubeChannelInfoProps> = ({ user }) => {
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-md space-y-4">
       <div className="flex items-center space-x-4">
-        <img
+        <Image
+          width={100}
+          height={100}
           className="w-24 h-24 rounded-full"
           src={youtube.snippet.thumbnails.high.url}
           alt={youtube.snippet.title}
