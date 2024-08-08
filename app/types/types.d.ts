@@ -16,10 +16,12 @@ declare module "next-auth/jwt" {
 }
 
 interface Video {
+  statistics: any;
   id: {
     videoId: string;
   };
   snippet: {
+    tags: string[] | null;
     title: string;
     description: string;
     thumbnails: {
