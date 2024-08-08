@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
         params: {
           prompt: "consent",
           scope:
-            "https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/youtube.readonly",
+            "openid profile email https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/youtube.readonly",
           response_type: "code",
           registration_uri: "https://accounts.google.com/o/oauth2/v2/auth",
           include_granted_scopes: "true",
@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (!token) return session;
-      // @ts-ignore
+      
       session.accessToken = token.accessToken;
       if (token.user) {
         session.user = token.user;
