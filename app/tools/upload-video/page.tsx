@@ -43,8 +43,20 @@ export default function Page() {
   const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=${regionCode}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
-      );
+        "https://www.googleapis.com/youtube/v3/videoCategories",
+        {
+            params: {
+                part: "snippet",
+                regionCode: regionCode,
+                key: process.env.NEXT_YOUTUBE_API_KEY
+            },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.accessToken}`,
+            },
+          
+        }
+    );
       console.log(
         `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=${regionCode}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
       );
