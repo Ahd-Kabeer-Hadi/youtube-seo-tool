@@ -114,6 +114,10 @@ const KeywordRecommendation: React.FC = () => {
             prettyPrint: true,
             key: process.env.NEXT_YOUTUBE_API_KEY,
           },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.accessToken}`,
+          },
         }
       );
       setApiResponse(response.data);
