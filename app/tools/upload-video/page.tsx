@@ -45,20 +45,15 @@ export default function Page() {
       const response = await axios.get(
         "https://www.googleapis.com/youtube/v3/videoCategories",
         {
-            params: {
-                part: "snippet",
-                regionCode: regionCode,
-                key: process.env.NEXT_YOUTUBE_API_KEY
-            },
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.accessToken}`,
-            },
-          
+          params: {
+            regionCode: regionCode,
+            key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.accessToken}`,
+          },
         }
-    );
-      console.log(
-        `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=${regionCode}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
       );
 
       setCategories(
@@ -70,7 +65,7 @@ export default function Page() {
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
-  }, [regionCode]);
+  }, [regionCode, session?.accessToken]);
 
   useEffect(() => {
     if (regionCode) {
@@ -104,7 +99,7 @@ export default function Page() {
     try {
       // Step 1: Initiate the resumable upload session
       const initResponse = await axios.post(
-        "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable",
+        "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
         {
           snippet: {
             title: videoDetails.title,
@@ -132,7 +127,7 @@ export default function Page() {
       // Step 3: Fetch the uploaded video details
       const videoId = await fetchUploadedVideoId(uploadUrl);
       const videoDataResponse = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}`
       );
 
       setUploadedVideo(videoDataResponse.data.items[0]);

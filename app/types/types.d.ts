@@ -1,19 +1,63 @@
 import NextAuth from "next-auth";
+import { JWT } from "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
     accessToken?: string;
+    user?: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      youtube?: {
+        id: string;
+        snippet: {
+          title: string;
+          description: string;
+          thumbnails: {
+            default: {
+              url: string;
+            };
+          };
+        };
+        statistics: {
+          viewCount: string;
+          subscriberCount: string;
+          hiddenSubscriberCount: boolean;
+        };
+      };
+    };
   }
+
   interface User {
-    accessToken?: string;
+    youtube?: {
+      id: string;
+      snippet: {
+        title: string;
+        description: string;
+        thumbnails: {
+          default: {
+            url: string;
+          };
+        };
+      };
+      statistics: {
+        viewCount: string;
+        subscriberCount: string;
+        hiddenSubscriberCount: boolean;
+      };
+    };
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     accessToken?: string;
+    refreshToken?: string;
+    accessTokenExpires?: number;
+    user?: User;
   }
 }
+
 
 interface Video {
   statistics: any;
