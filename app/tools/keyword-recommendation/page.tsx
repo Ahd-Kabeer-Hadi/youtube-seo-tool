@@ -43,7 +43,7 @@ const KeywordRecommendation: React.FC = () => {
             params: {
               part: "snippet,statistics",
               id: videoId,
-              key: process.env.NEXT_YOUTUBE_API_KEY,
+              key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
             },
           }
         );
@@ -112,7 +112,7 @@ const KeywordRecommendation: React.FC = () => {
             maxResults: 25,
             q: keyword,
             prettyPrint: true,
-            key: process.env.NEXT_YOUTUBE_API_KEY,
+            key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
           },
           headers: {
             "Content-Type": "application/json",
