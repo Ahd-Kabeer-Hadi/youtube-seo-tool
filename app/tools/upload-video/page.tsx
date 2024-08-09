@@ -47,7 +47,7 @@ export default function Page() {
         {
           params: {
             regionCode: regionCode,
-            key: "AIzaSyA9nuRlTtArnfU7HVnL0WtNdUNHkW_mWxw",
+            key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY,
           },
           headers: {
             "Content-Type": "application/json",
