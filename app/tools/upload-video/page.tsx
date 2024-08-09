@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { Console } from "console";
 
 export default function Page() {
   const { data: session, status } = useSession();
@@ -42,8 +43,12 @@ export default function Page() {
   const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=${regionCode}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}`
+        `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=${regionCode}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
       );
+      console.log(
+        `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=${regionCode}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
+      );
+
       setCategories(
         response.data.items.map((item: any) => ({
           id: item.id,
@@ -115,7 +120,7 @@ export default function Page() {
       // Step 3: Fetch the uploaded video details
       const videoId = await fetchUploadedVideoId(uploadUrl);
       const videoDataResponse = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}`
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.NEXT_YOUTUBE_API_KEY}`
       );
 
       setUploadedVideo(videoDataResponse.data.items[0]);
