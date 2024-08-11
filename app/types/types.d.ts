@@ -10,12 +10,26 @@ declare module "next-auth" {
       image?: string | null;
       youtube?: {
         id: string;
+        etag: string;
         snippet: {
           title: string;
           description: string;
+          customUrl?: string;
           thumbnails: {
             default: {
               url: string;
+              width?: number;
+              height?: number;
+            };
+            medium?: {
+              url: string;
+              width?: number;
+              height?: number;
+            };
+            high?: {
+              url: string;
+              width?: number;
+              height?: number;
             };
           };
         };
@@ -23,6 +37,13 @@ declare module "next-auth" {
           viewCount: string;
           subscriberCount: string;
           hiddenSubscriberCount: boolean;
+          videoCount?: string;
+        };
+        contentDetails?: {
+          relatedPlaylists?: {
+            likes?: string;
+            uploads?: string;
+          };
         };
       };
     };
@@ -31,12 +52,26 @@ declare module "next-auth" {
   interface User {
     youtube?: {
       id: string;
+      etag: string;
       snippet: {
         title: string;
         description: string;
+        customUrl?: string;
         thumbnails: {
           default: {
             url: string;
+            width?: number;
+            height?: number;
+          };
+          medium?: {
+            url: string;
+            width?: number;
+            height?: number;
+          };
+          high?: {
+            url: string;
+            width?: number;
+            height?: number;
           };
         };
       };
@@ -44,6 +79,13 @@ declare module "next-auth" {
         viewCount: string;
         subscriberCount: string;
         hiddenSubscriberCount: boolean;
+        videoCount?: string;
+      };
+      contentDetails?: {
+        relatedPlaylists?: {
+          likes?: string;
+          uploads?: string;
+        };
       };
     };
   }
@@ -57,7 +99,6 @@ declare module "next-auth/jwt" {
     user?: User;
   }
 }
-
 
 interface Video {
   statistics: any;

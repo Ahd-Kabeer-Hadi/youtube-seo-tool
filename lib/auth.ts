@@ -3,6 +3,8 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import axios from "axios";
 import { JWT } from "next-auth/jwt";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,19 +14,15 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           prompt: "consent",
+          access_type: "offline", // Ensures we get a refresh token
           scope:
             "openid profile email https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/youtube.readonly",
-          response_type: "code",
-          registration_uri: "https://accounts.google.com/o/oauth2/v2/auth",
-          include_granted_scopes: "true",
-          state: "pass-through value",
-          response_mode: "query",
         },
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (!user || !account?.access_token) return false;
 
       if (account.provider === "google") {
@@ -48,14 +46,66 @@ export const authOptions: NextAuthOptions = {
             youtubeData.data.items.length > 0
           ) {
             user.youtube = youtubeData.data.items[0];
+            await prisma.user.upsert({
+              where: { email: user.email as string },
+              update: {
+                image: user.image,
+                name: user.name || "a unique person from youtube",
+                youtubeAccount: {
+                  upsert: {
+                    create: {
+                      youtubeId: user?.youtube?.id!,
+                      etag: user?.youtube?.etag!,
+                      title: user?.youtube?.snippet.title,
+                      description: user?.youtube?.snippet.description,
+                      customUrl: user?.youtube?.snippet.customUrl || undefined,
+                      image:
+                        user?.youtube?.snippet.thumbnails?.default?.url ||
+                        undefined,
+                    },
+                    update: {
+                      etag: user?.youtube?.etag,
+                      title: user?.youtube?.snippet.title,
+                      description: user?.youtube?.snippet.description,
+                      customUrl: user?.youtube?.snippet.customUrl || undefined,
+                      image:
+                        user?.youtube?.snippet.thumbnails?.default?.url ||
+                        undefined,
+                    },
+                  },
+                },
+              },
+              create: {
+                email: user.email as string,
+                name: user.name!,
+                image: user.image,
+                youtubeAccount: {
+                  create: {
+                    youtubeId: user?.youtube?.id!,
+                    etag: user?.youtube?.etag!,
+                    title: user?.youtube?.snippet.title,
+                    description: user?.youtube?.snippet.description,
+                    customUrl: user?.youtube?.snippet.customUrl || undefined,
+                    image:
+                      user?.youtube?.snippet.thumbnails?.default?.url ||
+                      undefined,
+                  },
+                },
+              },
+            });
           }
-        } catch (error) {
-          console.error("Failed to fetch YouTube data:", error);
+        } catch (error: any) {
+          console.error(
+            "Failed to fetch YouTube data:",
+            error.response?.data || error.message
+          );
         }
       }
+
       return true;
     },
     async jwt({ token, account, user }) {
+      // Initial sign-in
       if (account) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
@@ -63,25 +113,23 @@ export const authOptions: NextAuthOptions = {
           Date.now() + ((account.expires_in as number) || 0) * 1000;
       }
 
+      // Add user details to the token
       if (user) {
         token.user = user;
       }
 
+      // If the access token has not expired, return it
       if (Date.now() < (token.accessTokenExpires || 0)) {
         return token;
       }
 
+      // Access token has expired, try to refresh it
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
-      if (token.accessToken) {
-        session.accessToken = token.accessToken;
-      }
-
-      if (token.user) {
-        session.user = token.user;
-      }
-
+      // Attach the access token and user to the session
+      session.accessToken = token.accessToken;
+      session.user = token.user;
       return session;
     },
   },
@@ -102,8 +150,11 @@ const refreshAccessToken = async (token: JWT): Promise<JWT> => {
       accessToken: response.data.access_token,
       accessTokenExpires: Date.now() + response.data.expires_in * 1000,
     };
-  } catch (error) {
-    console.error("Failed to refresh access token:", error);
+  } catch (error: any) {
+    console.error(
+      "Failed to refresh access token:",
+      error.response?.data || error.message
+    );
     return { ...token, error: "RefreshAccessTokenError" };
   }
 };
