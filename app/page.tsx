@@ -12,7 +12,10 @@ export default function Home() {
   const { data: session, status } = useSession();
   useEffect(() => {
     if (status === "unauthenticated") {
-      signIn(); // Redirect to sign-in page
+      signIn("google", {
+        scope:
+          "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube",
+      }); // Redirect to sign-in page
     }
   }, [status]);
 

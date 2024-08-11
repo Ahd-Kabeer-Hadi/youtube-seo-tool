@@ -4,12 +4,24 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Console } from "console";
+
+interface VideoDetails {
+  title: string;
+  description: string;
+  tags: string;
+  categoryId: string;
+  privacyStatus: string;
+}
+
+interface Category {
+  id: string;
+  title: string;
+}
 
 export default function Page() {
   const { data: session, status } = useSession();
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoDetails, setVideoDetails] = useState({
+  const [videoDetails, setVideoDetails] = useState<VideoDetails>({
     title: "",
     description: "",
     tags: "",
@@ -17,11 +29,9 @@ export default function Page() {
     privacyStatus: "private",
   });
   const [uploading, setUploading] = useState(false);
-  const [uploadedVideo, setUploadedVideo] = useState<any>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [categories, setCategories] = useState<{ id: string; title: string }[]>(
-    []
-  );
+  const [uploadedVideoId, setUploadedVideoId] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [regionCode, setRegionCode] = useState<string>("");
 
   useEffect(() => {
@@ -31,6 +41,7 @@ export default function Page() {
       fetchRegionCode();
     }
   }, [status]);
+
   const fetchRegionCode = async () => {
     try {
       const response = await axios.get("https://ipapi.co/json/");
@@ -42,6 +53,8 @@ export default function Page() {
 
   const fetchCategories = useCallback(async () => {
     try {
+      if (!regionCode) return;
+
       const response = await axios.get(
         "https://www.googleapis.com/youtube/v3/videoCategories",
         {
@@ -90,14 +103,15 @@ export default function Page() {
   };
 
   const handleUpload = async () => {
-    if (!videoFile) return alert("Please select a video file to upload.");
+    if (!videoFile) {
+      return alert("Please select a video file to upload.");
+    }
 
     setUploading(true);
-    setUploadedVideo(null);
     setUploadProgress(0);
 
     try {
-      // Step 1: Initiate the resumable upload session
+      // Step 1: Initiate the upload session
       const initResponse = await axios.post(
         "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
         {
@@ -120,62 +134,49 @@ export default function Page() {
       );
 
       const uploadUrl = initResponse.headers.location;
+      console.log("Upload URL:", uploadUrl);
 
-      // Step 2: Upload the video file to the obtained URL in chunks or in full
-      await uploadVideoChunks(uploadUrl);
+      // Step 2: Upload the video file in full (simplified)
+      const uploadResponse = await axios.put(uploadUrl, videoFile, {
+        headers: {
+          "Content-Type": videoFile.type,
+          "Content-Length": videoFile.size.toString(),
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+            if (percentCompleted === 100) {
+              setUploadedVideoId(initResponse.data.id);
+            }
+          }
+        },
+      });
 
       // Step 3: Fetch the uploaded video details
-      const videoId = await fetchUploadedVideoId(uploadUrl);
-      const videoDataResponse = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}`
-      );
+      const videoId = initResponse.data.id;
+      setUploadedVideoId(videoId);
 
-      setUploadedVideo(videoDataResponse.data.items[0]);
+      // Clear state after successful upload
+      setVideoFile(null);
+      setVideoDetails({
+        title: "",
+        description: "",
+        tags: "",
+        categoryId: "",
+        privacyStatus: "private",
+      });
+
       setUploading(false);
       setUploadProgress(null);
+      alert("Video uploaded successfully!");
     } catch (error) {
       console.error("Error uploading video:", error);
       setUploading(false);
       setUploadProgress(null);
     }
-  };
-
-  const uploadVideoChunks = async (uploadUrl: string) => {
-    const chunkSize = 256 * 1024; // 256KB per chunk
-    let start = 0;
-    let end = chunkSize;
-
-    while (start < videoFile!.size) {
-      const videoChunk = videoFile!.slice(start, end);
-      await axios.put(uploadUrl, videoChunk, {
-        headers: {
-          "Content-Type": videoFile!.type,
-          "Content-Range": `bytes ${start}-${end - 1}/${videoFile!.size}`,
-        },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / videoFile!.size
-            );
-            setUploadProgress(percentCompleted);
-          }
-        },
-      });
-
-      start = end;
-      end = Math.min(end + chunkSize, videoFile!.size);
-    }
-  };
-
-  const fetchUploadedVideoId = async (uploadUrl: string) => {
-    const response = await axios.put(uploadUrl, null, {
-      headers: {
-        "Content-Length": "0",
-        "Content-Range": `bytes */${videoFile!.size}`,
-      },
-    });
-
-    return response.data.id;
   };
 
   if (status === "loading") {
@@ -188,7 +189,7 @@ export default function Page() {
 
   if (status === "authenticated") {
     return (
-      <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-8">
         <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
           <h2 className="text-2xl font-semibold mb-4">
             Upload a Video to YouTube
@@ -281,6 +282,7 @@ export default function Page() {
               <option value="unlisted">Unlisted</option>
             </select>
           </div>
+
           <Button
             onClick={handleUpload}
             disabled={uploading}
@@ -292,41 +294,38 @@ export default function Page() {
           </Button>
 
           {uploading && uploadProgress !== null && (
-            <div className="mt-4">
-              <p className="text-center text-blue-600">
-                Upload progress: {uploadProgress}%
-              </p>
+            <div className="mt-4 text-center">
+              <p>Upload Progress: {uploadProgress}%</p>
             </div>
           )}
 
-          {uploadedVideo && (
-            <div className="mt-6 text-center">
-              <h3 className="text-xl font-semibold text-green-600">
-                Video Uploaded Successfully!
-              </h3>
-              <Image
-                width={100}
-                height={100}
-                src={uploadedVideo.snippet.thumbnails.default.url}
-                alt="Video Thumbnail"
-                className="mx-auto mt-4 rounded-md shadow-md"
-              />
-              <p className="mt-2">
+          {uploadedVideoId && (
+            <div className="mt-4 text-center">
+              <p className="text-green-500">
+                Upload successful!{" "}
                 <a
-                  href={`https://www.youtube.com/watch?v=${uploadedVideo.id}`}
+                  href={`https://www.youtube.com/watch?v=${uploadedVideoId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
+                  className="underline"
                 >
-                  Watch on YouTube
+                  Watch your video
                 </a>
               </p>
+              <div className="mt-2">
+                <Image
+                  src={`https://img.youtube.com/vi/${uploadedVideoId}/hqdefault.jpg`}
+                  alt="Uploaded video thumbnail"
+                  width={320}
+                  height={180}
+                />
+              </div>
             </div>
           )}
         </div>
-      </main>
+      </div>
     );
   }
 
-  return null; // Render nothing while redirecting
+  return null;
 }
